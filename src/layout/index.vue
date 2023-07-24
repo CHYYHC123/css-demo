@@ -1,3 +1,31 @@
+<template>
+  <div :class="classObj" class="app-wrapper">
+    <!-- 手机设备侧边栏打开遮罩层 -->
+    <div
+      v-if="classObj.mobile && classObj.openSidebar"
+      class="drawer-bg"
+      @click="handleOutsideClick"
+    ></div>
+
+    <Sidebar class="sidebar-container" />
+
+    <div :class="{ hasTagsView: showTagsView }" class="main-container">
+      <div :class="{ 'fixed-header': fixedHeader }">
+        <navbar />
+        <tags-view v-if="showTagsView" />
+      </div>
+
+      <!--主页面-->
+      <app-main />
+
+      <!-- 设置面板 -->
+      <RightPanel v-if="showSettings">
+        <settings />
+      </RightPanel>
+    </div>
+  </div>
+</template>
+
 <script setup lang="ts">
 import { computed, watchEffect } from "vue";
 import { useWindowSize } from "@vueuse/core";
@@ -53,34 +81,6 @@ function handleOutsideClick() {
   appStore.closeSideBar(false);
 }
 </script>
-
-<template>
-  <div :class="classObj" class="app-wrapper">
-    <!-- 手机设备侧边栏打开遮罩层 -->
-    <div
-      v-if="classObj.mobile && classObj.openSidebar"
-      class="drawer-bg"
-      @click="handleOutsideClick"
-    ></div>
-
-    <Sidebar class="sidebar-container" />
-
-    <div :class="{ hasTagsView: showTagsView }" class="main-container">
-      <div :class="{ 'fixed-header': fixedHeader }">
-        <navbar />
-        <tags-view v-if="showTagsView" />
-      </div>
-
-      <!--主页面-->
-      <app-main />
-
-      <!-- 设置面板 -->
-      <RightPanel v-if="showSettings">
-        <settings />
-      </RightPanel>
-    </div>
-  </div>
-</template>
 
 <style lang="scss" scoped>
 .app-wrapper {

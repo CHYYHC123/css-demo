@@ -376,17 +376,6 @@ defineExpose({
         }
       }
     }
-    // .rightIcon {
-    //   background-color: #f5f5f5;
-    //   font-size: 20px;
-    //   color: #757575;
-    //   height: 34px;
-    //   line-height: 33px;
-    //   padding: 0 7px;
-    //   border: 1px solid #ccc;
-    //   border-left: none;
-    //   border-radius: 0 3px 3px 0;
-    // }
     .CodeMirror {
       font-family: inherit !important;
       box-sizing: border-box;
