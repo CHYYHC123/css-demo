@@ -6,7 +6,7 @@
       <li><FallDown></FallDown></li>
       <li><Chessboard></Chessboard></li>
       <li><OutsideCircle></OutsideCircle></li>
-      <li></li>
+      <li><GlitchArt></GlitchArt></li>
     </ul>
   </div>
 </template>
@@ -16,6 +16,7 @@ import NightDayToggle from "./components/nightDayToggle.vue";
 import FallDown from "./components/fallDown.vue";
 import Chessboard from "./components/chessboard.vue";
 import OutsideCircle from "./components/outsideCircle.vue";
+import GlitchArt from "./components/glitchArt.vue";
 </script>
 
 <style lang="scss" scoped>
