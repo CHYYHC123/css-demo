@@ -1,8 +1,6 @@
 {
   "name": "vue3-element-admin",
-  "private": true,
-  "version": "2.4.0",
-  "type": "module",
+  "version": "1.0.0",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "dev": "vite serve --mode development",
