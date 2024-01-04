@@ -2,58 +2,62 @@
 const props = defineProps({
   modelValue: {
     type: String,
-    require: false
-  },
-  /**
-   * 图标选择器宽度
-   */
-  width: {
-    type: String,
     require: false,
-    default: '400px'
-  }
+    default: "",
+  },
 });
 
-const emit = defineEmits(['update:modelValue']);
-const visible = ref(false);
-const inputValue = toRef(props, 'modelValue');
-const width = toRef(props, 'width');
-const iconNames: string[] = [];
-const filterIconNames = ref<string[]>([]);
+const emit = defineEmits(["update:modelValue"]);
+const inputValue = toRef(props, "modelValue");
 
-const filterValue = ref('');
+const visible = ref(false); // 弹窗显示状态
 
+const allIconNames: string[] = []; // 所有的图标名称集合
+
+const filterValue = ref(""); // 筛选的值
+const filterIconNames = ref<string[]>([]); // 过滤后的图标名称集合
+
+const iconSelectorRef = ref();
+const iconSelectorDialogRef = ref();
+/**
+ * icon 加载
+ */
 function loadIcons() {
-  const icons = import.meta.glob('../../assets/icons/*.svg');
+  const icons = import.meta.glob("../../assets/icons/*.svg");
   for (const icon in icons) {
-    const iconName = icon.split('assets/icons/')[1].split('.svg')[0];
-    iconNames.push(iconName);
+    const iconName = icon.split("assets/icons/")[1].split(".svg")[0];
+    allIconNames.push(iconName);
   }
-  filterIconNames.value = iconNames;
+  filterIconNames.value = allIconNames;
 }
 
 /**
- * 筛选图标
+ * icon 筛选
  */
-function handleIconFilter() {
+function handleFilter() {
   if (filterValue.value) {
-    filterIconNames.value = iconNames.filter(iconName =>
+    filterIconNames.value = allIconNames.filter((iconName) =>
       iconName.includes(filterValue.value)
     );
   } else {
-    filterIconNames.value = iconNames;
+    filterIconNames.value = allIconNames;
   }
 }
 
 /**
- * 选择图标
- *
- * @param iconName 选择的图标名称
+ * icon 选择
  */
-function onIconSelect(iconName: string) {
-  emit('update:modelValue', iconName);
+function handleSelect(iconName: string) {
+  emit("update:modelValue", iconName);
   visible.value = false;
 }
+
+/**
+ * 点击容器外的区域关闭弹窗 VueUse onClickOutside
+ */
+onClickOutside(iconSelectorRef, () => (visible.value = false), {
+  ignore: [iconSelectorDialogRef],
+});
 
 onMounted(() => {
   loadIcons();
@@ -61,15 +65,15 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="relative" :style="{ width: width }">
+  <div ref="iconSelectorRef" class="iconselect-container">
     <el-input
       v-model="inputValue"
       readonly
-      @click="visible = !visible"
       placeholder="点击选择图标"
+      @click="visible = !visible"
     >
       <template #prepend>
-        <svg-icon :icon-class="inputValue"></svg-icon>
+        <svg-icon :icon-class="inputValue" />
       </template>
     </el-input>
 
@@ -78,12 +82,12 @@ onMounted(() => {
       :visible="visible"
       placement="bottom-end"
       trigger="click"
-      :width="400"
+      width="400"
     >
       <template #reference>
         <div
-          @click="visible = !visible"
           class="cursor-pointer text-[#999] absolute right-[10px] top-0 height-[32px] leading-[32px]"
+          @click="visible = !visible"
         >
           <i-ep-caret-top v-show="visible"></i-ep-caret-top>
           <i-ep-caret-bottom v-show="!visible"></i-ep-caret-bottom>
@@ -91,32 +95,34 @@ onMounted(() => {
       </template>
 
       <!-- 下拉选择弹窗 -->
-      <el-input
-        class="p-2"
-        v-model="filterValue"
-        placeholder="搜索图标"
-        clearable
-        @input="handleIconFilter"
-      />
-      <el-divider border-style="dashed" />
+      <div ref="iconSelectorDialogRef">
+        <el-input
+          v-model="filterValue"
+          class="p-2"
+          placeholder="搜索图标"
+          clearable
+          @input="handleFilter"
+        />
+        <el-divider border-style="dashed" />
 
-      <el-scrollbar height="300px">
-        <ul class="icon-list">
-          <li
-            class="icon-item"
-            v-for="(iconName, index) in filterIconNames"
-            :key="index"
-            @click="onIconSelect(iconName)"
-          >
-            <el-tooltip :content="iconName" placement="bottom" effect="light">
-              <svg-icon
-                color="var(--el-text-color-regular)"
-                :icon-class="iconName"
-              />
-            </el-tooltip>
-          </li>
-        </ul>
-      </el-scrollbar>
+        <el-scrollbar height="300px">
+          <ul class="icon-list">
+            <li
+              v-for="(iconName, index) in filterIconNames"
+              :key="index"
+              class="icon-item"
+              @click="handleSelect(iconName)"
+            >
+              <el-tooltip :content="iconName" placement="bottom" effect="light">
+                <svg-icon
+                  color="var(--el-text-color-regular)"
+                  :icon-class="iconName"
+                />
+              </el-tooltip>
+            </li>
+          </ul>
+        </el-scrollbar>
+      </div>
     </el-popover>
   </div>
 </template>
@@ -125,6 +131,12 @@ onMounted(() => {
 .el-divider--horizontal {
   margin: 10px auto !important;
 }
+
+.iconselect-container {
+  position: relative;
+  width: 400px;
+}
+
 .icon-list {
   display: flex;
   flex-wrap: wrap;
@@ -132,18 +144,19 @@ onMounted(() => {
   margin-top: 10px;
 
   .icon-item {
-    cursor: pointer;
-    width: 10%;
-    margin: 0 10px 10px 0;
-    padding: 5px;
     display: flex;
     flex-direction: column;
-    justify-items: center;
     align-items: center;
+    justify-items: center;
+    width: 10%;
+    padding: 5px;
+    margin: 0 10px 10px 0;
+    cursor: pointer;
     border: 1px solid #ccc;
+
     &:hover {
-      border-color: var(--el-color-primary);
       color: var(--el-color-primary);
+      border-color: var(--el-color-primary);
       transition: all 0.2s;
       transform: scaleX(1.1);
     }

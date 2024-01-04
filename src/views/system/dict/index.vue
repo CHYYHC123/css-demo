@@ -1,22 +1,21 @@
 <!--字典类型-->
-<script lang="ts">
-export default {
-  name: 'dictType'
-};
-</script>
-
 <script setup lang="ts">
+defineOptions({
+  name: "DictType",
+  inheritAttrs: false,
+});
+
 import {
   getDictTypePage,
   getDictTypeForm,
   addDictType,
   updateDictType,
-  deleteDictTypes
-} from '@/api/dict';
+  deleteDictTypes,
+} from "@/api/dict";
 
-import DictData from '@/views/system/dict/DictData.vue';
+import DictData from "@/views/system/dict/DictData.vue";
 
-import { DictTypePageVO, DictTypeQuery, DictTypeForm } from '@/api/dict/types';
+import { DictTypePageVO, DictTypeQuery, DictTypeForm } from "@/api/dict/types";
 
 const queryFormRef = ref(ElForm);
 const dataFormRef = ref(ElForm);
@@ -27,22 +26,22 @@ const total = ref(0);
 
 const queryParams = reactive<DictTypeQuery>({
   pageNum: 1,
-  pageSize: 10
+  pageSize: 10,
 });
 
 const dictTypeList = ref<DictTypePageVO[]>();
 
 const dialog = reactive<DialogOption>({
-  visible: false
+  visible: false,
 });
 
 const formData = reactive<DictTypeForm>({
-  status: 1
+  status: 1,
 });
 
 const rules = reactive({
-  name: [{ required: true, message: '请输入字典类型名称', trigger: 'blur' }],
-  code: [{ required: true, message: '请输入字典类型编码', trigger: 'blur' }]
+  name: [{ required: true, message: "请输入字典类型名称", trigger: "blur" }],
+  code: [{ required: true, message: "请输入字典类型编码", trigger: "blur" }],
 });
 
 /**
@@ -71,8 +70,6 @@ function resetQuery() {
 
 /**
  * 行checkbox change事件
- *
- * @param selection
  */
 function handleSelectionChange(selection: any) {
   ids.value = selection.map((item: any) => item.id);
@@ -86,12 +83,12 @@ function handleSelectionChange(selection: any) {
 function openDialog(dicTypeId?: number) {
   dialog.visible = true;
   if (dicTypeId) {
-    dialog.title = '修改字典类型';
+    dialog.title = "修改字典类型";
     getDictTypeForm(dicTypeId).then(({ data }) => {
       Object.assign(formData, data);
     });
   } else {
-    dialog.title = '新增字典类型';
+    dialog.title = "新增字典类型";
   }
 }
 
@@ -99,14 +96,14 @@ function openDialog(dicTypeId?: number) {
  * 字典类型表单提交
  */
 function handleSubmit() {
-  loading.value = false;
   dataFormRef.value.validate((isValid: boolean) => {
     if (isValid) {
+      loading.value = false;
       const dictTypeId = formData.id;
       if (dictTypeId) {
         updateDictType(dictTypeId, formData)
           .then(() => {
-            ElMessage.success('修改成功');
+            ElMessage.success("修改成功");
             closeDialog();
             handleQuery();
           })
@@ -114,7 +111,7 @@ function handleSubmit() {
       } else {
         addDictType(formData)
           .then(() => {
-            ElMessage.success('新增成功');
+            ElMessage.success("新增成功");
             closeDialog();
             handleQuery();
           })
@@ -146,40 +143,44 @@ function resetForm() {
 /**
  * 删除字典类型
  */
-function handleDelete(dictTypeId: number) {
-  ElMessageBox.confirm('确认删除已选中的数据项?', '警告', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
+function handleDelete(dictTypeId?: number) {
+  const dictTypeIds = [dictTypeId || ids.value].join(",");
+  if (!dictTypeIds) {
+    ElMessage.warning("请勾选删除项");
+    return;
+  }
+
+  ElMessageBox.confirm("确认删除已选中的数据项?", "警告", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
   }).then(() => {
-    const dictTypeIds = [dictTypeId || ids.value].join(',');
     deleteDictTypes(dictTypeIds).then(() => {
-      ElMessage.success('删除成功');
+      ElMessage.success("删除成功");
       resetQuery();
     });
   });
 }
 
 const dictDataDialog = reactive<DialogOption>({
-  visible: false
+  visible: false,
 });
 
-// 当前选中的字典类型
-const selectedDictType = reactive({ typeCode: '', typeName: '' });
+const selectedDictType = reactive({ typeCode: "", typeName: "" }); // 当前选中的字典类型
 
 /**
- * 打开字典弹窗
+ * 打开字典数据弹窗
  */
 function openDictDialog(row: DictTypePageVO) {
   dictDataDialog.visible = true;
-  dictDataDialog.title = '【' + row.name + '】字典数据';
+  dictDataDialog.title = "【" + row.name + "】字典数据";
 
   selectedDictType.typeCode = row.code;
   selectedDictType.typeName = row.name;
 }
 
 /**
- * 关闭字典弹窗
+ * 关闭字典数据弹窗
  */
 function closeDictDialog() {
   dictDataDialog.visible = false;
@@ -192,11 +193,11 @@ onMounted(() => {
 
 <template>
   <div class="app-container">
-    <div class="search">
+    <div class="search-container">
       <el-form ref="queryFormRef" :model="queryParams" :inline="true">
         <el-form-item label="关键字" prop="name">
           <el-input
-            v-model="queryParams.name"
+            v-model="queryParams.keywords"
             placeholder="字典类型名称/编码"
             clearable
             @keyup.enter="handleQuery"
@@ -213,22 +214,25 @@ onMounted(() => {
 
     <el-card shadow="never">
       <template #header>
-        <el-button type="success" @click="openDialog()"
+        <el-button
+          v-hasPerm="['sys:dict_type:add']"
+          type="success"
+          @click="openDialog()"
           ><i-ep-plus />新增</el-button
         >
         <el-button
           type="danger"
           :disabled="ids.length === 0"
-          @click="handleDelete"
+          @click="handleDelete()"
           ><i-ep-delete />删除</el-button
         >
       </template>
       <el-table
+        v-loading="loading"
         highlight-current-row
         :data="dictTypeList"
-        v-loading="loading"
-        @selection-change="handleSelectionChange"
         border
+        @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column label="字典类型名称" prop="name" width="200" />
@@ -250,6 +254,7 @@ onMounted(() => {
               ><i-ep-Collection />字典数据</el-button
             >
             <el-button
+              v-hasPerm="['sys:dict_type:edit']"
               type="primary"
               link
               size="small"
@@ -257,6 +262,7 @@ onMounted(() => {
               ><i-ep-edit />编辑</el-button
             >
             <el-button
+              v-hasPerm="['sys:dict_type:delete']"
               type="primary"
               link
               size="small"
@@ -277,8 +283,8 @@ onMounted(() => {
     </el-card>
 
     <el-dialog
-      :title="dialog.title"
       v-model="dialog.visible"
+      :title="dialog.title"
       width="500px"
       @close="closeDialog"
     >
@@ -319,8 +325,8 @@ onMounted(() => {
 
     <!--字典数据弹窗-->
     <el-dialog
-      :title="dictDataDialog.title"
       v-model="dictDataDialog.visible"
+      :title="dictDataDialog.title"
       width="1000px"
       @close="closeDictDialog"
     >
