@@ -11,6 +11,16 @@
         <lang-select class="text-white! cursor-pointer" />
       </div>
 
+      <div v-if="isShowTip" class="text-white">
+        <p>《绝句》 唐·杜甫</p>
+        <p>两个黄鹂鸣翠柳,</p>
+        <p>一行白鹭上青天。</p>
+        <p>窗含西岭千秋雪，</p>
+        <p>门泊东吴万里船。</p>
+      </div>
+
+      <el-button @click="clickBtn">点击</el-button>
+
       <el-form-item prop="username">
         <div class="p-2 text-white">
           <svg-icon icon-class="user" />
@@ -104,6 +114,21 @@ import { LoginData } from "@/api/auth/types";
 
 const userStore = useUserStore();
 const route = useRoute();
+
+//
+const show = ref(false);
+let show1 = false;
+const isShowTip = computed(() => {
+  if ( show.value) {
+    return true;
+  }
+  return false;
+});
+
+const clickBtn = () => {
+  show.value = !show.value;
+  show1 = !show1;
+};
 
 /**
  * 按钮loading
