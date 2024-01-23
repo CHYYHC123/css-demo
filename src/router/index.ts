@@ -46,6 +46,12 @@ export const constantRoutes: RouteRecordRaw[] = [
     ],
   },
 
+  {
+    path: "/interview",
+    component: () => import("@/views/interviewQuestions/index.vue"),
+    meta: { hidden: true },
+  }
+
   // 外部链接
   /*{
         path: '/external-link',

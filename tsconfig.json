@@ -12,6 +12,8 @@
     "lib": ["esnext", "dom"],
     "baseUrl": ".",
     "allowJs": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
     "paths": {
       "@/*": ["src/*"]
     },
